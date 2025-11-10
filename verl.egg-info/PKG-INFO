@@ -1,0 +1,165 @@
+Metadata-Version: 2.4
+Name: verl
+Version: 0.4.0.dev0
+Summary: verl: Volcano Engine Reinforcement Learning for LLM
+Home-page: https://github.com/volcengine/verl
+Author: Bytedance - Seed - MLSys
+Author-email: zhangchi.usc1992@bytedance.com, gmsheng@connect.hku.hk
+License: Apache 2.0
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: accelerate
+Requires-Dist: codetiming
+Requires-Dist: datasets
+Requires-Dist: dill
+Requires-Dist: hydra-core
+Requires-Dist: numpy<2.0.0
+Requires-Dist: pandas
+Requires-Dist: peft
+Requires-Dist: pyarrow>=19.0.0
+Requires-Dist: pybind11
+Requires-Dist: pylatexenc
+Requires-Dist: ray[default]>=2.41.0
+Requires-Dist: torchdata
+Requires-Dist: tensordict!=0.9.0,<=0.10.0,>=0.8.0
+Requires-Dist: transformers
+Requires-Dist: wandb
+Requires-Dist: packaging>=20.0
+Requires-Dist: tensorboard
+Provides-Extra: test
+Requires-Dist: pytest; extra == "test"
+Requires-Dist: pre-commit; extra == "test"
+Requires-Dist: py-spy; extra == "test"
+Requires-Dist: pytest-asyncio; extra == "test"
+Provides-Extra: prime
+Requires-Dist: pyext; extra == "prime"
+Provides-Extra: geo
+Requires-Dist: mathruler; extra == "geo"
+Requires-Dist: torchvision; extra == "geo"
+Requires-Dist: qwen_vl_utils; extra == "geo"
+Provides-Extra: gpu
+Requires-Dist: liger-kernel; extra == "gpu"
+Requires-Dist: flash-attn; extra == "gpu"
+Provides-Extra: math
+Requires-Dist: math-verify; extra == "math"
+Provides-Extra: vllm
+Requires-Dist: tensordict!=0.9.0,<=0.10.0,>=0.8.0; extra == "vllm"
+Requires-Dist: vllm<=0.11.0,>=0.8.5; extra == "vllm"
+Provides-Extra: sglang
+Requires-Dist: tensordict!=0.9.0,<=0.10.0,>=0.8.0; extra == "sglang"
+Requires-Dist: sglang[openai,srt]==0.5.2; extra == "sglang"
+Requires-Dist: torch==2.8.0; extra == "sglang"
+Provides-Extra: trl
+Requires-Dist: trl<=0.9.6; extra == "trl"
+Provides-Extra: mcore
+Requires-Dist: mbridge; extra == "mcore"
+Provides-Extra: transferqueue
+Requires-Dist: TransferQueue@ git+https://github.com/TransferQueue/TransferQueue.git@68c04e7 ; extra == "transferqueue"
+Dynamic: author
+Dynamic: author-email
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: license
+Dynamic: license-file
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: summary
+
+# README
+
+**CoLA任务RL训练代码库**
+
+[[English](README_en.md)|中文]
+
+## 目录
+
+- [项目简介](#项目简介)
+- [更新日志](#更新日志)
+- [测评指标](#测评指标)
+- [主要结果](#主要结果)
+- [如何使用](#如何使用)
+- [待办事项](#待办事项)
+
+## 项目简介
+
+本仓库主要聚焦于利用`Qwen3`系列模型，通过强化学习（`Reinforcement Learning`, `RL`）技术，完成`GLUE`基准中的`CoLA`（`Corpus of Linguistic Acceptability`）子任务的句子可接受性分类。代码实现了数据预处理、模型训练和评估全流程，方便快速上手与复现相关研究。
+
+## 更新日志
+
+[25/09/08]整理主要结果，上传wandb模型训练记录。
+
+[25/07/23]修复数据准备错误，新增`SFT`数据准备代码和训练脚本（基于`LLaMA-Factory`框架），新增`REMAX`、`DAPO`训练脚本，新增`Text Classification`代码，新增`DeepSeek R1 0528`蒸馏`COLA`数据集。
+
+[25/06/22]完成数据处理流程、模型`GRPO`训练脚本（基于`verl`框架）和[文档编写](docs)
+
+## 测评指标
+
+- 对比指标[Matthews相关系数](https://en.wikipedia.org/wiki/Phi_coefficient)（MCC）
+- 提示词：
+
+```
+Decide whether the following sentence is grammatically acceptable or not. If it is grammatically correct, answer "acceptable". If not, answer "unacceptable". Only output "acceptable" or "unacceptable", and do not output any other information.
+
+Sentence: {sentence}
+
+Your answer:
+```
+
+## 主要结果
+
+![](docs/figs/wandb_show.png)
+
+|         Model          | Fine-tuning method |  验证集   | 测试集（kaggle） |
+| :--------------------: | :----------------: | :-------: | :--------------: |
+|       Qwen3-0.6B       |         -          |   0.223   |      待测试      |
+|    DeepSeek V3 0324    |         -          | **0.726** |      待测试      |
+|    DeepSeek R1 0120    |         -          |   0.636   |      待测试      |
+|    DeepSeek R1 0528    |         -          |   0.658   |      待测试      |
+|    Qwen3-1.7B-Remax    |     Remax (RL)     |   0.658   |      待测试      |
+|    Qwen3-1.7B-GRPO     |     GRPO (RL)      |   0.669   |      待测试      |
+| Qwen3-1.7B-SFT-E1-GRPO |  SFT + GRPO (RL)   | **0.702** |      待测试      |
+|       Bert-base        |        CLS         |   0.548   |      待测试      |
+|     Qwen3-0.6B-CLS     |        CLS         |   0.610   |      待测试      |
+|     Qwen3-1.7B-SFT     |        SFT         |   0.657   |      待测试      |
+|     Qwen3-0.6B-SFT     |        SFT         |   0.598   |      待测试      |
+
+> [!Note]
+>
+> `SFT-E1-GRPO`后缀表示模型先进行1个`Epoch`的`SFT`后再进行`GRPO`。
+>
+> `CLS`后缀表示模型输出头变为分类头。
+
+- 各模型训练记录[wandb log](https://wandb.ai/work-hao/CoLA?nw=nwuserytzfhqs)
+
+## 如何使用
+
+### 环境搭建
+
+> [!TIP]
+> 参阅[文档](docs/verl框架训练与Debug.md)。
+
+### 模型下载
+
+- 从[魔搭社区](https://modelscope.cn/home)或[Huggingface](https://huggingface.co/models)下载`Qwen3`系列模型到`model`文件夹下。
+
+### GRPO训练
+
+- 修改脚本`run_grpo_qwen3_0.6b.sh`，修改`wandb api key`、工作目录和训练`GPU`编号。
+- 启动训练：
+
+```shell
+bash run_grpo_qwen3_0.6b.sh
+```
+
+## 待办事项
+
+- 对比不同RL算法对CoLA分类的效果。
+- 对比不同参数量模型对CoLA分类的效果。
+- 上传`wandb`报告。
+
+## 致谢
+
+- [CoLA Dataset](https://nyu-mll.github.io/CoLA/)
+
+- [Verl Framework](https://github.com/volcengine/verl)
