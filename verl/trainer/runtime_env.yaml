@@ -1,0 +1,11 @@
+working_dir: ./
+excludes:
+  - ".git/"  # 原有配置，保留
+  - "checkpoints/**"  # 排除所有 checkpoint 文件（递归所有子目录）
+  - "model/**/*.pt"  # 排除模型目录下的所有 .pt 权重文件
+  - "model/**/tokenizer.json"  # 排除分词器大文件（如果有的话）
+  - "*.log"  # 可选：排除根目录下的日志文件（避免上传冗余日志）
+env_vars:
+  TORCH_NCCL_AVOID_RECORD_STREAMS: "1"
+  # If you are using vllm<=0.6.3, you might need to set the following environment variable to avoid bugs:
+  # VLLM_ATTENTION_BACKEND: "XFORMERS"
